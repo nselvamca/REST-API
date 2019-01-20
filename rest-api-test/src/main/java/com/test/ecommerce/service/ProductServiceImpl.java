@@ -13,12 +13,12 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.test.ecommerce.constant.ProductsEnumConstants;
 import com.test.ecommerce.exception.ProductException;
-import com.test.ecommerce.products.model.ColorSwatches;
-import com.test.ecommerce.products.model.Product;
-import com.test.ecommerce.products.model.Products;
+import com.test.ecommerce.model.products.ColorSwatches;
+import com.test.ecommerce.model.products.Product;
+import com.test.ecommerce.model.products.Products;
 import com.test.ecommerce.util.EcommerceUtil;
-
 
 
 @Service("productService")
@@ -29,99 +29,88 @@ public class ProductServiceImpl implements ProductService{
 	@Resource(name = "rgbColor")
 	private Map<String, String> rgbColorProperties;
 
-
+	
 	@Override
 	public Products getAllProducts(String labelType) throws ProductException {
 		
-		
 		Products products = null;
 		List<Product> productsList = new ArrayList<Product>();
-		
-		
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode root;		
+		JsonNode productsrootNode;		
 		
 		try {			
 			
+			/* This code will read Products JSON data from the file*/
+			productsrootNode = mapper.readTree(EcommerceUtil.readDataFromFile()).get(ProductsEnumConstants.PRODUCTS.vlaue());
 			
-			root = mapper.readTree(EcommerceUtil.readDataFromFile()).get("products");
+			/* This below commented code - get Real Time Data from given URL using RestTemplate */
+			//root = mapper.readTree(EcommerceUtil.getDataByRestTempate().getBody()).get("products"); 
 			
-			//root = mapper.readTree(EcommerceUtil.getDataByRestTempate().getBody()).get("products");
-			
-			if (root.isArray()) {
+			if (productsrootNode.isArray()) {
 				
-				root.forEach((JsonNode objNode) ->{
+				productsrootNode.forEach((JsonNode productsNode) ->{
 					
 					Product product = new Product();
+					JsonNode wasNode = productsNode.get(ProductsEnumConstants.PRICE.vlaue()).get(ProductsEnumConstants.WAS.vlaue());
 					
-					JsonNode wasNode = objNode.get("price").findValue("was");
-					
+					/* This if condition used to filter products with a price reduction 
+					 * (Using Was Price)                                 
+					 */
 					if(wasNode.textValue() != null && wasNode.toString().length() > 2) {
 					
-					
 					String priceLabelNowPrice = null;
-					String priceLabelWasPrice = objNode.get("price").get("was").textValue();
-					priceLabelWasPrice = convertPriceDecToInt(priceLabelWasPrice);
+					String priceLabelWasPrice = getNodeTextValByTwoFieldParam(productsNode, ProductsEnumConstants.PRICE.vlaue(), ProductsEnumConstants.WAS.vlaue());
+					priceLabelWasPrice = convertPriceDecToInt(priceLabelWasPrice); /* This line will calculate Price Reduction */
 					
-					Integer wasValue = Integer.parseInt(priceLabelWasPrice);
-					product.setPriceReduction(wasValue);
-					
-					if(objNode.get("price").get("now").hasNonNull("to")) {
+					/* This if condition will assign 'Now' Price from 'To' Price element (if the Now Element has From & To Price)*/				
+					if(productsNode.get(ProductsEnumConstants.PRICE.vlaue()).get(ProductsEnumConstants.NOW.vlaue()).hasNonNull(ProductsEnumConstants.TO.vlaue())) {
 						
-						String nowPrice = objNode.get("price").get("now").get("to").textValue();
+						String nowPrice = getNodeTextValByThreeFieldParam(productsNode, ProductsEnumConstants.PRICE.vlaue(), ProductsEnumConstants.NOW.vlaue(), 
+										ProductsEnumConstants.TO.vlaue());
 						nowPrice = convertPriceDecToInt(nowPrice);
 						product.setNowPrice("£"+nowPrice);
-						
 						priceLabelNowPrice = nowPrice;
 
 					    } else {
-					    	
-					    	String nowPrice = objNode.get("price").get("now").textValue();
+					    	String nowPrice = getNodeTextValByTwoFieldParam(productsNode, ProductsEnumConstants.PRICE.vlaue(), ProductsEnumConstants.NOW.vlaue());
 							nowPrice = convertPriceDecToInt(nowPrice);
 						    product.setNowPrice("£"+nowPrice);
 						    priceLabelNowPrice = nowPrice;
-
 					    }
 					
-					
+					/* This line will calculate Price Reduction */
 					product.setPriceReduction(Integer.parseInt(priceLabelWasPrice) - Integer.parseInt(priceLabelNowPrice));
-					
 					String wasNowPrice = "";
 					
-					 wasNowPrice = getLabelByType(labelType, objNode, priceLabelNowPrice, priceLabelWasPrice);
+					/* This line will use to get Then Now Price */
+					 wasNowPrice = getLabelByType(labelType, productsNode, priceLabelNowPrice, priceLabelWasPrice);
 					product.setPriceLabel(wasNowPrice);
-					
 					
 					}else {
 						
 						return;
 					}
 					
-
-					if(objNode.get("colorSwatches").isArray()) {
-						
+					/* This condition will check whether ColotSwatces element is an array of JSON Node */
+					if(productsNode.get(ProductsEnumConstants.COLORSWATCHES.vlaue()).isArray()) {
 						
 						List<ColorSwatches> colorSwatchesList = new ArrayList<ColorSwatches>();
 						
-						objNode.get("colorSwatches").forEach((JsonNode colorNode) ->{
-							
+						productsNode.get(ProductsEnumConstants.COLORSWATCHES.vlaue()).forEach((JsonNode colorNode) ->{
+
 							ColorSwatches colorSwatches = new ColorSwatches();
-							colorSwatches.setColor(colorNode.get("color").textValue());
-							colorSwatches.setRgbColor(rgbColorProperties.get(colorNode.get("basicColor").textValue()));
-							colorSwatches.setSkuid(colorNode.get("skuId").textValue());
-							
-							
+							colorSwatches.setColor(getNodeTextValByOneFieldParam(colorNode, ProductsEnumConstants.COLOR.vlaue()));
+							/* This condition get RGB Color from Property file */
+							colorSwatches.setRgbColor(rgbColorProperties.get(getNodeTextValByOneFieldParam(colorNode, ProductsEnumConstants.BASICCOLOR.vlaue())));
+							colorSwatches.setSkuid(getNodeTextValByOneFieldParam(colorNode, ProductsEnumConstants.SKUID.vlaue()));
 							colorSwatchesList.add(colorSwatches);
-						
 						});
 						
-						product.setColorSwatches(colorSwatchesList);
-						
+						product.setColorSwatches(colorSwatchesList);						
 					}
 			    	
-					
-			    	product.setProductId(objNode.get("productId").textValue());
-			    	product.setTitle(objNode.get("title").textValue());
+			    	product.setProductId(getNodeTextValByOneFieldParam( productsNode, ProductsEnumConstants.PRODUCTID.vlaue()));
+			    	product.setTitle(getNodeTextValByOneFieldParam(productsNode, ProductsEnumConstants.TITLE.vlaue()));
 			    	productsList.add(product); 
 					
 				});
@@ -131,6 +120,9 @@ public class ProductServiceImpl implements ProductService{
 			
 			products = new Products();
 			
+			/* This Line of code used to sorted to show the highest price reduction first 
+			 * 
+			 */
 			products.setProducts(productsList.stream().sorted((o1, o2)->o2.getPriceReduction().
 	                compareTo(o1.getPriceReduction())).
 	                collect(Collectors.toList()));
@@ -140,38 +132,71 @@ public class ProductServiceImpl implements ProductService{
 			throw new ProductException("Internal Server Error");
 		}
 		
-		
 		return products;
 	}
-
-	private String getLabelByType(String labelType, JsonNode objNode, String priceLabelNowPrice,
+	
+	
+	
+	/**
+	   * This method is used to filter LableType element by given condition
+	   * @param labelType parameter to filter Label Type
+	   * @param productsNode is a JsonNode of Products
+	   * @param priceLabelNowPrice to pass Now Price element value
+	   * @param priceLabelWasPrice to pass Was Price element Value
+	   * @return Sting of LableType price details
+	   */
+	private String getLabelByType(String labelType, JsonNode productsNode, String priceLabelNowPrice,
 			String priceLabelWasPrice) throws NumberFormatException {
+		
 		String thenPrice;
 		String wasNowPrice = "";
-		if(labelType != null && labelType.equals("ShowWasThenNow")) {
-		
-		
-		 thenPrice	= (objNode.get("price").get("then2").textValue().length() > 0) ? ", Then £" + convertPriceDecToInt(objNode.get("price").get("then2").textValue())  
-							
-				: (objNode.get("price").get("then1").textValue().length() > 0) ? ", Then £" + convertPriceDecToInt(objNode.get("price").get("then1").textValue()) : "";
-		
-			wasNowPrice =	"Was £" + priceLabelWasPrice + thenPrice + ", Now £" + priceLabelNowPrice;
-		 
-		 } else if(labelType != null && labelType.equals("ShowPercDscount")) {
+		String wasConcatCurrency = ProductsEnumConstants.WAS.vlaue() + " " + ProductsEnumConstants.POUND.vlaue();
+		String nowConcatCurrency = ProductsEnumConstants.NOW.vlaue() + " " + ProductsEnumConstants.POUND.vlaue();
+				
+		if (labelType != null && labelType.equals(ProductsEnumConstants.SHOWWASTHENNOW.vlaue())) {
 			
-			wasNowPrice = "30% Off - Now £"+priceLabelNowPrice;
-					
+			String thenConcatCurrency = ProductsEnumConstants.THEN.vlaue() + " " + ProductsEnumConstants.POUND.vlaue();
+
+			thenPrice = (getNodeTextValByTwoFieldParam(productsNode, ProductsEnumConstants.PRICE.vlaue(), ProductsEnumConstants.THEN2.vlaue()).length() > 0)
+					?  ", "  + thenConcatCurrency + convertPriceDecToInt(getNodeTextValByTwoFieldParam(productsNode, ProductsEnumConstants.PRICE.vlaue(), ProductsEnumConstants.THEN2.vlaue()))
+
+					: (getNodeTextValByTwoFieldParam(productsNode, ProductsEnumConstants.PRICE.vlaue(), ProductsEnumConstants.THEN1.vlaue()).length() > 0) ? ", "  + thenConcatCurrency 
+							+ convertPriceDecToInt(getNodeTextValByTwoFieldParam(productsNode, ProductsEnumConstants.PRICE.vlaue(), ProductsEnumConstants.THEN1.vlaue())) : "";
+
+			wasNowPrice = wasConcatCurrency + priceLabelWasPrice + thenPrice + ", "+ nowConcatCurrency + priceLabelNowPrice;
+
+		} else if (labelType != null && labelType.equals(ProductsEnumConstants.SHOWPERDSCOUNT.vlaue())) {
+
+			wasNowPrice = "30% Off - "+ nowConcatCurrency + priceLabelNowPrice;
+
 		} else {
-			
-			wasNowPrice = "Was £" + priceLabelWasPrice + ", Now £" + priceLabelNowPrice;
+
+			wasNowPrice = wasConcatCurrency + priceLabelWasPrice + ", "+ nowConcatCurrency + priceLabelNowPrice;
 		}
 		return wasNowPrice;
 	}
-
+	
+	/**
+	   * This method is used to Convert Decimal Value to Integer (Eg : 150.00 to 150)
+	   * @param Price - Decimal Price
+	   * @return Sting as Integer Format
+	   */
 	private String convertPriceDecToInt(String price) throws NumberFormatException {
 		int nowPriceInInt = (int) Double.parseDouble(price);
 		price	= (nowPriceInInt > 10) ? ""+nowPriceInInt : price;
 		return price;
+	}
+	
+	private String getNodeTextValByThreeFieldParam(JsonNode productsNode, String fieldNameOne, String filedNameTwo, String filedNameThree) {
+		return productsNode.get(fieldNameOne).get(filedNameTwo).get(filedNameThree).textValue();
+	}
+
+	private String getNodeTextValByTwoFieldParam(JsonNode productsNode, String fieldNameOne, String filedNameTwo) {
+		return productsNode.get(fieldNameOne).get(filedNameTwo).textValue();
+	}
+	
+	private String getNodeTextValByOneFieldParam(JsonNode productsNode, String fieldNameOne) {
+		return productsNode.get(fieldNameOne).textValue();
 	}
 
 }

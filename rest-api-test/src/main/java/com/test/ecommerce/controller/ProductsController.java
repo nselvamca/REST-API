@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.test.ecommerce.constant.ProductsEnumConstants;
 import com.test.ecommerce.exception.ErrorResponse;
 import com.test.ecommerce.exception.ProductException;
-import com.test.ecommerce.products.model.Products;
+import com.test.ecommerce.model.products.Products;
 import com.test.ecommerce.service.ProductService;
 
 
@@ -32,8 +33,8 @@ public class ProductsController {
 	 						String labelType) throws ProductException{
 		
 		
-       if ((labelType != null) && !(labelType.equals("ShowWasNow") || labelType.equals("ShowWasThenNow")
-    		   || labelType.equals("ShowPercDscount"))) {
+       if ((labelType != null) && !(labelType.equals(ProductsEnumConstants.SHOWWASNOW.vlaue()) || labelType.equals(ProductsEnumConstants.SHOWWASTHENNOW.vlaue())
+    		   || labelType.equals(ProductsEnumConstants.SHOWPERDSCOUNT.vlaue()))) {
     	   throw new ProductException("Invalid Input");
        }
        

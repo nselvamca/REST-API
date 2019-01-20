@@ -1,4 +1,4 @@
-package com.test.ecommerce.products.model;
+package com.test.ecommerce.model.products;
 
 import java.util.List;
 

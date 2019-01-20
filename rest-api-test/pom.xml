@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.test</groupId>
 	<artifactId>rest-api-test</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>rest-api-tes</version>
 	<packaging>war</packaging>
 	<name>rest-api-test</name>
 	<description>Demo project for Spring Boot</description>
