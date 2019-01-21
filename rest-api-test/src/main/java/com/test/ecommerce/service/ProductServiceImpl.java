@@ -41,10 +41,10 @@ public class ProductServiceImpl implements ProductService{
 		try {			
 			
 			/* This code will read Products JSON data from the file*/
-			productsrootNode = mapper.readTree(EcommerceUtil.readDataFromFile()).get(ProductsEnumConstants.PRODUCTS.vlaue());
+			//productsrootNode = mapper.readTree(EcommerceUtil.readDataFromFile()).get(ProductsEnumConstants.PRODUCTS.vlaue());
 			
 			/* This below commented code - get Real Time Data from given URL using RestTemplate */
-			//root = mapper.readTree(EcommerceUtil.getDataByRestTempate().getBody()).get("products"); 
+			productsrootNode = mapper.readTree(EcommerceUtil.getDataByRestTempate().getBody()).get("products"); 
 			
 			if (productsrootNode.isArray()) {
 				

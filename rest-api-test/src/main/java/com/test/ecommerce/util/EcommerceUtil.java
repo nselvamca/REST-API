@@ -22,7 +22,7 @@ public class EcommerceUtil {
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> responseEntity = null;
 		String resourceUrl
-		  = "";
+		  = ProductsEnumConstants.INPUTJSONURL.vlaue();
 		
 		try {
 		 responseEntity = restTemplate.getForEntity(resourceUrl, String.class);

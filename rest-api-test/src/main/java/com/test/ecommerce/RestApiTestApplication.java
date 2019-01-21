@@ -3,12 +3,11 @@ package com.test.ecommerce;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ClassPathResource;
 
 @SpringBootApplication
-public class RestApiTestApplication extends SpringBootServletInitializer{
+public class RestApiTestApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(RestApiTestApplication.class, args);

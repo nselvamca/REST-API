@@ -20,7 +20,8 @@ public enum ProductsEnumConstants {
     SHOWWASNOW("ShowWasNow"),
     SHOWWASTHENNOW("ShowWasThenNow"),
     SHOWPERDSCOUNT("ShowPercDscount"),
-    FOLDERNFILENAME("data/products.json");
+    FOLDERNFILENAME("data/products.json"),
+    INPUTJSONURL("https://jl-nonprod-syst.apigee.net/v1/categories/600001506/products?key=2ALHCAAs6ikGRBoy6eTHA58RaG097Fma");
 	
 	
 	private String vlaue;
