@@ -19,7 +19,8 @@ public enum ProductsEnumConstants {
     SKUID("skuId"),
     SHOWWASNOW("ShowWasNow"),
     SHOWWASTHENNOW("ShowWasThenNow"),
-    SHOWPERDSCOUNT("ShowPercDscount");
+    SHOWPERDSCOUNT("ShowPercDscount"),
+    FOLDERNFILENAME("data/products.json");
 	
 	
 	private String vlaue;
