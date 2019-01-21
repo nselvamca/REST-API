@@ -28,12 +28,12 @@ This Spring Boot- REST-API will get all Products from a input JSON
 <br>
 - Mockito (MockMVC)
 <br>
-<h>API URI</h>
+<h>API URL</h>
 <br>
 <b>URI for all Products : </b>
 <br>
-/v1/products/allproducts
+http://localhost:8081/v1/products/allproducts
 <br>
-<b>URI for optional Param : ( labelType=ShowWasNow / labelType=ShowWasThenNow / labelType=ShowPercDscount </b>
+<b>URL for optional Param : ( labelType=ShowWasNow / labelType=ShowWasThenNow / labelType=ShowPercDscount </b>
 <br>
-/v1/products/allproducts?labelType=ShowWasNow
+http://localhost:8081/v1/products/allproducts?labelType=ShowWasNow
