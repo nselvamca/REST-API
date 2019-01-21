@@ -21,7 +21,7 @@ This Spring Boot- REST-API will get all Products from a input JSON
 <h2>Build, Deploy And Run</h2>
 - Use Maven Build or Export as WAR from STS (build file is rest-api-test-0.0.1-SNAPSHOT.war)
 <br>
-- Run the WAR file as java -jar rest-api-test-0.0.1-SNAPSHOT.war
+- In command prompt Run the WAR file as java -jar rest-api-test-0.0.1-SNAPSHOT.war (make sure JAVA_HOME is set in machine)
 
 <h2>Unit Test</h2>
 - JUNIT
